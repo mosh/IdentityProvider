@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.21005.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{656346D9-4656-40DA-A068-22D5425D4639}") = "IdentityProviderWebApplication", "IdentityProviderWebApplication\IdentityProviderWebApplication.oxygene", "{F4F218FB-F15B-4FF4-A0CE-36D16DA00FB4}"
+EndProject
+Project("{656346D9-4656-40DA-A068-22D5425D4639}") = "Moshine.Identity", "Moshine.Identity\Moshine.Identity.oxygene", "{729137C3-3369-4A41-BECC-44352D493E84}"
+EndProject
+Project("{656346D9-4656-40DA-A068-22D5425D4639}") = "IdentityConsoleApplication", "IdentityConsoleApplication\IdentityConsoleApplication.oxygene", "{812CB811-F8A7-46B7-BB0B-EBFDF0C0E01D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Mixed Platforms = Debug|Mixed Platforms
+		Release|Mixed Platforms = Release|Mixed Platforms
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F4F218FB-F15B-4FF4-A0CE-36D16DA00FB4}.Debug|Mixed Platforms.ActiveCfg = Debug
+		{F4F218FB-F15B-4FF4-A0CE-36D16DA00FB4}.Debug|Mixed Platforms.Build.0 = Debug
+		{F4F218FB-F15B-4FF4-A0CE-36D16DA00FB4}.Release|Mixed Platforms.ActiveCfg = Release
+		{F4F218FB-F15B-4FF4-A0CE-36D16DA00FB4}.Release|Mixed Platforms.Build.0 = Release
+		{729137C3-3369-4A41-BECC-44352D493E84}.Debug|Mixed Platforms.ActiveCfg = Debug
+		{729137C3-3369-4A41-BECC-44352D493E84}.Debug|Mixed Platforms.Build.0 = Debug
+		{729137C3-3369-4A41-BECC-44352D493E84}.Release|Mixed Platforms.ActiveCfg = Release
+		{729137C3-3369-4A41-BECC-44352D493E84}.Release|Mixed Platforms.Build.0 = Release
+		{812CB811-F8A7-46B7-BB0B-EBFDF0C0E01D}.Debug|Mixed Platforms.ActiveCfg = Debug
+		{812CB811-F8A7-46B7-BB0B-EBFDF0C0E01D}.Debug|Mixed Platforms.Build.0 = Debug
+		{812CB811-F8A7-46B7-BB0B-EBFDF0C0E01D}.Release|Mixed Platforms.ActiveCfg = Release
+		{812CB811-F8A7-46B7-BB0B-EBFDF0C0E01D}.Release|Mixed Platforms.Build.0 = Release
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
