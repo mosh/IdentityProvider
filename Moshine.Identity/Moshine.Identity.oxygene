@@ -73,6 +73,9 @@
       <HintPath>..\packages\Owin.1.0\lib\net40\Owin.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="RemObjects.Oxygene.Dynamic">
+      <HintPath>C:\Program Files\RemObjects Software\Oxygene\Echoes\Oxygene Reference Assemblies\RemObjects.Oxygene.Dynamic.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Data.SqlServerCe">

@@ -66,7 +66,7 @@ type
     [OverrideAuthentication]
     [HostAuthentication(DefaultAuthenticationTypes.ExternalBearer)]
     [Route('RegisterExternal')]
-    method RegisterExternal(model:RegisterExternalBindingModel):Task<IHttpActionResult>;async;
+    method RegisterExternal(model:RegisterExternalBindingModel):Task<IHttpActionResult>;
 
     /// <summary>
     /// returnUrl=/&generateState=true
@@ -78,6 +78,23 @@ type
     [AllowAnonymous]
     [Route("ExternalLogins")]
     method GetExternalLogins(returnUrl:String; generateState:Boolean):IEnumerable<ExternalLoginViewModel>;
+
+    // POST api/Account/SetPassword
+    [Route("SetPassword")]
+    method SetPassword(model:SetPasswordBindingModel):Task<IHttpActionResult>;
+
+    // POST api/Account/ChangePassword
+    [Route("ChangePassword")]
+    method ChangePassword(model:ChangePasswordBindingModel):Task<IHttpActionResult>;
+
+    // POST api/Account/RemoveLogin
+    [Route("RemoveLogin")]
+    method RemoveLogin(model:RemoveLoginBindingModel):Task<IHttpActionResult>;
+
+    // POST api/Account/Register
+    [AllowAnonymous]
+    [Route("Register")]
+    method Register(model:RegisterBindingModel):Task<IHttpActionResult>;
 
   end;
 
@@ -283,14 +300,14 @@ method AccountController.RegisterExternal(model:RegisterExternalBindingModel):Ta
 begin
   if (not ModelState.IsValid)then
   begin
-      exit Task.FromResult<IHttpActionResult>(BadRequest(ModelState));
+      exit BadRequest(ModelState);
   end;
 
   var externalLogin := ExternalLoginData.FromIdentity(User.Identity as ClaimsIdentity);
 
   if (not assigned(externalLogin))then
   begin
-      exit Task.FromResult<IHttpActionResult>(InternalServerError());
+      exit InternalServerError();
   end;
 
   var user := new IdentityUser
@@ -303,16 +320,15 @@ begin
 //      ProviderKey := externalLogin.ProviderKey
 //  ));
 
-  var createTask := UserManager.CreateAsync(user);
-  createTask.Wait;
-  var errorResult := GetErrorResult(createTask.Result);
+  var &create := await UserManager.CreateAsync(user);
+  var errorResult := GetErrorResult(&create);
 
   if (assigned(errorResult))then
   begin
-      exit Task.FromResult<IHttpActionResult>(errorResult);
+      exit errorResult;
   end;
 
-  exit Task.FromResult<IHttpActionResult>(Ok());
+  exit Ok();
 
 end;
 
@@ -367,109 +383,93 @@ begin
 
 end;
 
+method AccountController.SetPassword(model:SetPasswordBindingModel):Task<IHttpActionResult>;
+begin
+  if (not ModelState.IsValid)then
+  begin
+      exit BadRequest(ModelState);
+  end;
 
-//
-//        // POST api/Account/ChangePassword
-//        [Route("ChangePassword")]
-//        public async Task<IHttpActionResult> ChangePassword(ChangePasswordBindingModel model)
-//        {
-//            if (!ModelState.IsValid)
-//            {
-//                return BadRequest(ModelState);
-//            }
-//
-//            IdentityResult result = await UserManager.ChangePasswordAsync(User.Identity.GetUserId(), model.OldPassword,
-//                model.NewPassword);
-//            IHttpActionResult errorResult = GetErrorResult(result);
-//
-//            if (errorResult != null)
-//            {
-//                return errorResult;
-//            }
-//
-//            return Ok();
-//        }
-//
-//        // POST api/Account/SetPassword
-//        [Route("SetPassword")]
-//        public async Task<IHttpActionResult> SetPassword(SetPasswordBindingModel model)
-//        {
-//            if (!ModelState.IsValid)
-//            {
-//                return BadRequest(ModelState);
-//            }
-//
-//            IdentityResult result = await UserManager.AddPasswordAsync(User.Identity.GetUserId(), model.NewPassword);
-//            IHttpActionResult errorResult = GetErrorResult(result);
-//
-//            if (errorResult != null)
-//            {
-//                return errorResult;
-//            }
-//
-//            return Ok();
-//        }
-//
-//
-//        // POST api/Account/RemoveLogin
-//        [Route("RemoveLogin")]
-//        public async Task<IHttpActionResult> RemoveLogin(RemoveLoginBindingModel model)
-//        {
-//            if (!ModelState.IsValid)
-//            {
-//                return BadRequest(ModelState);
-//            }
-//
-//            IdentityResult result;
-//
-//            if (model.LoginProvider == LocalLoginProvider)
-//            {
-//                result = await UserManager.RemovePasswordAsync(User.Identity.GetUserId());
-//            }
-//            else
-//            {
-//                result = await UserManager.RemoveLoginAsync(User.Identity.GetUserId(),
-//                    new UserLoginInfo(model.LoginProvider, model.ProviderKey));
-//            }
-//
-//            IHttpActionResult errorResult = GetErrorResult(result);
-//
-//            if (errorResult != null)
-//            {
-//                return errorResult;
-//            }
-//
-//            return Ok();
-//        }
-//
-//
-//
-//        // POST api/Account/Register
-//        [AllowAnonymous]
-//        [Route("Register")]
-//        public async Task<IHttpActionResult> Register(RegisterBindingModel model)
-//        {
-//            if (!ModelState.IsValid)
-//            {
-//                return BadRequest(ModelState);
-//            }
-//
-//            IdentityUser user = new IdentityUser
-//            {
-//                UserName = model.UserName
-//            };
-//
-//            IdentityResult result = await UserManager.CreateAsync(user, model.Password);
-//            IHttpActionResult errorResult = GetErrorResult(result);
-//
-//            if (errorResult != null)
-//            {
-//                return errorResult;
-//            }
-//
-//            return Ok();
-//        }
-//
-//
+  var &result := await UserManager.AddPasswordAsync(User.Identity.GetUserId(), model.NewPassword);
+  var errorResult := GetErrorResult(&result);
+
+  if (assigned(errorResult))then
+  begin
+      exit errorResult;
+  end;
+
+  exit Ok();
+
+end;
+
+method AccountController.ChangePassword(model:ChangePasswordBindingModel):Task<IHttpActionResult>;
+begin
+
+  if (not ModelState.IsValid)then
+  begin
+      exit BadRequest(ModelState);
+  end;
+
+  var &result := await UserManager.ChangePasswordAsync(User.Identity.GetUserId(), model.OldPassword, model.NewPassword);
+  var errorResult := GetErrorResult(&result);
+
+  if (assigned(errorResult))then
+  begin
+      exit errorResult;
+  end;
+
+  exit Ok();
+end;
+
+method AccountController.RemoveLogin(model:RemoveLoginBindingModel):Task<IHttpActionResult>;
+begin
+
+  if (not ModelState.IsValid)then
+  begin
+      exit BadRequest(ModelState);
+  end;
+
+  var &result:IdentityResult;
+
+  if (model.LoginProvider = LocalLoginProvider)then
+  begin
+      &result := await UserManager.RemovePasswordAsync(User.Identity.GetUserId());
+  end
+  else
+  begin
+      &result := await UserManager.RemoveLoginAsync(User.Identity.GetUserId(),
+          new UserLoginInfo(model.LoginProvider, model.ProviderKey));
+  end;
+
+  var errorResult := GetErrorResult(&result);
+
+  if (assigned(errorResult))then
+  begin
+      exit errorResult;
+  end;
+
+  exit Ok();
+end;
+
+method AccountController.Register(model:RegisterBindingModel):Task<IHttpActionResult>;
+begin
+
+  if (not ModelState.IsValid)then
+  begin
+      exit BadRequest(ModelState);
+  end;
+
+  var user := new IdentityUser (UserName := model.UserName);
+
+  var &result := await UserManager.CreateAsync(user, model.Password);
+  var errorResult := GetErrorResult(&result);
+
+  if (assigned(errorResult))then
+  begin
+      exit errorResult;
+  end;
+
+  exit Ok();
+end;
 
 end.

@@ -10,7 +10,8 @@ uses
   System.Collections.Generic,
   System.Linq,
   System.Text, 
-  Moshine.Identity.Models;
+  Moshine.Identity.Models, 
+  Moshine.Identity.Repositories;
 
 type
 
@@ -21,12 +22,17 @@ type
     IUserRoleStore<IdentityUser>,
     IUserPasswordStore<IdentityUser>)
   private
+
+
     method GetRolesAsync(user: IdentityUser): Task<IList<dynamic>>;
     method IsInRoleAsync(user: IdentityUser; role: String): Task<dynamic>;
     method GetPasswordHashAsync(user: IdentityUser): Task<dynamic>;
     method HasPasswordAsync(user: IdentityUser): Task<dynamic>;
 
     _connection : SqlCeConnection;
+    _userRepository : UserRepository;
+    _claimRepository : UserClaimRepository;
+    _loginRepository : UserLoginRepository;
 
   public
     constructor(connection: SqlCeConnection);
@@ -62,101 +68,135 @@ implementation
 constructor UserStore(connection: SqlCeConnection);
 begin
   _connection := connection;
+  _userRepository := new UserRepository(_connection);
+  _claimRepository := new UserClaimRepository(_connection);
+  _loginRepository := new UserLoginRepository(_connection);
 end;
 
 
 method UserStore.CreateAsync(user: IdentityUser): Task;
 begin
+
+  _userRepository.Add(user);
+
   exit Task.FromResult<Object>(nil);
 end;
 
 method UserStore.FindByIdAsync(userId: String): Task<IdentityUser>;
 begin
-  exit Task.FromResult<IdentityUser>(nil);
+  exit Task.FromResult<IdentityUser>(_userRepository.FindById(userId));
 end;
 
 method UserStore.FindByNameAsync(userName: String): Task<IdentityUser>;
 begin
-  exit Task.FromResult<IdentityUser>(nil);
+  exit Task.FromResult<IdentityUser>(_userRepository.FindById(userName));
 end;
 
 method UserStore.UpdateAsync(user: IdentityUser): Task;
 begin
+  raise new NotImplementedException;
   exit Task.FromResult<Object>(nil);
 end;
 
-method UserStore.AddClaimAsync(user: IdentityUser; claim: System.Security.Claims.Claim): Task;
+method UserStore.AddClaimAsync(user: IdentityUser; claim: Claim): Task;
 begin
+
+  _claimRepository.Add(claim, user.Id);
+
   exit Task.FromResult<Object>(nil);
 end;
 
 method UserStore.GetClaimsAsync(user: IdentityUser): Task<IList<Claim>>;
 begin
+  raise new NotImplementedException;
   exit Task.FromResult<IList<Claim>>(nil);
 end;
 
 method UserStore.RemoveClaimAsync(user: IdentityUser; claim: Claim): Task;
 begin
+  raise new NotImplementedException;
   exit Task.FromResult<IList<Claim>>(nil);
 end;
 
 method UserStore.AddLoginAsync(user: IdentityUser; login: UserLoginInfo): Task;
 begin
+
+  _loginRepository.Add(user,login);
+
   exit Task.FromResult<Object>(nil);
 end;
 
 method UserStore.FindAsync(login: UserLoginInfo): Task<IdentityUser>;
 begin
-  exit Task.FromResult<IdentityUser>(nil);
+  var userId := _loginRepository.FindUserIdByLogin(login);
+
+  if(String.IsNullOrEmpty(userId))then
+  begin
+    exit Task.FromResult<IdentityUser>(nil);
+  end
+  else
+  begin
+    exit Task.FromResult<IdentityUser>(_userRepository.FindById(userId));
+  end;
 end;
 
 method UserStore.GetLoginsAsync(user:IdentityUser):Task<IList<UserLoginInfo>>; 
 begin
+  raise new NotImplementedException;
   exit Task.FromResult<IList<UserLoginInfo>>(nil);
 end;
 
 method UserStore.RemoveLoginAsync(user:IdentityUser;login:UserLoginInfo):Task;
 begin
+  raise new NotImplementedException;
   exit Task.FromResult<Object>(nil);
 end;
 
 method UserStore.AddToRoleAsync(user:IdentityUser;roleName:String):Task;
 begin
+  raise new NotImplementedException;
   exit Task.FromResult<Object>(nil);
 end;
 
 method UserStore.GetRolesAsync(user:IdentityUser):Task<IList<String>>; 
 begin
+  raise new NotImplementedException;
   exit Task.FromResult<IList<String>>(nil);
 end;
 
 method UserStore.IsInRoleAsync(user:IdentityUser;role:String):Task<Boolean>;
 begin
+  raise new NotImplementedException;
   exit Task.FromResult<Boolean>(false);
 end;
 
 method UserStore.RemoveFromRoleAsync(user:IdentityUser;role:String):Task;
 begin
+  raise new NotImplementedException;
   exit Task.FromResult<Object>(nil);
 end;
 
 method UserStore.DeleteAsync(user:IdentityUser):Task;
 begin
+  raise new NotImplementedException;
   exit Task.FromResult<Object>(nil);
 end;
 
 method UserStore.GetPasswordHashAsync(user:IdentityUser):Task<String>;
 begin
+  raise new NotImplementedException;
   exit Task.FromResult<String>(nil);
 end;
 
 method UserStore.HasPasswordAsync(user:IdentityUser):Task<Boolean>;
 begin
+  raise new NotImplementedException;
   exit Task.FromResult<Boolean>(false);
 end;
 
 method UserStore.SetPasswordHashAsync(user:IdentityUser;passwordHash:String):Task;
 begin
+  raise new NotImplementedException;
   exit Task.FromResult<Object>(nil);
 end;
 

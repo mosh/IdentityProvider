@@ -4,7 +4,9 @@ interface
 
 uses
   System.Collections.Generic,
+  System.Dynamic,
   System.Linq,
+  System.Security.Claims,
   System.Text;
 
 type
@@ -13,6 +15,7 @@ type
   protected
   public
     method Create;override;
+    method Add(claim:Claim; userId:String);
   end;
 
 implementation
@@ -40,6 +43,21 @@ begin
 
   Execute(sqlText);
 
+end;
+
+method UserClaimRepository.Add(claim: Claim; userId: String);
+begin
+  var sqlText := new StringBuilder();
+  sqlText.Append('Insert into UserClaims (ClaimType, ClaimValue, User_Id) values (');
+  sqlText.Append('@ClaimType, @ClaimValue, @UserId)');
+
+  var executeParams:dynamic := new ExpandoObject;
+
+  executeParams.ClaimType := claim.Type;
+  executeParams.ClaimValue := claim.Value;
+  executeParams.UserId := userId;
+
+  Execute(sqlText, Object(executeParams));
 end;
 
 end.
