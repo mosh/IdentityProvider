@@ -55,6 +55,7 @@
             }).fail(function () {
             }).done(function (data) {
                 if (!data.hasRegistered) {
+                    $("#registerTable").css("visibility", "visible");
                     $("#userName").val(data.userName);
                 }
                 else {
@@ -116,7 +117,7 @@
                 </tr>
             </tbody>
         </table>
-        <table>
+        <table id="registerTable" style="visibility:hidden">
             <tr>
                 <td colspan="2">Register your google account</td>
             </tr>

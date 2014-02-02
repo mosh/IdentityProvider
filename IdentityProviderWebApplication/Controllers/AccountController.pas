@@ -146,14 +146,14 @@ begin
 
   var logins := new List<UserLoginInfoViewModel>();
 
-//  for each linkedAccount in user.Logins do
-//  begin
-//      logins.Add(new UserLoginInfoViewModel
-//      (
-//          LoginProvider := linkedAccount.LoginProvider,
-//          ProviderKey := linkedAccount.ProviderKey
-//      ));
-//  end;
+  for each linkedAccount in user.Logins do
+  begin
+      logins.Add(new UserLoginInfoViewModel
+      (
+          LoginProvider := linkedAccount.LoginProvider,
+          ProviderKey := linkedAccount.ProviderKey
+      ));
+  end;
 
   if (user.PasswordHash <> nil)then
   begin
@@ -168,9 +168,9 @@ begin
   new ManageInfoViewModel
   (
       LocalLoginProvider := LocalLoginProvider,
-      UserName := user.UserName//,
-      //Logins := logins,
-      //ExternalLoginProviders = GetExternalLogins(returnUrl, generateState)
+      UserName := user.UserName,
+      Logins := logins,
+      ExternalLoginProviders := GetExternalLogins(returnUrl, generateState)
   ));
 
 end;
@@ -268,7 +268,7 @@ end;
 
 method AccountController.GetErrorResult(&result:IdentityResult):IHttpActionResult; 
 begin
-  if (result = nil)then
+  if (&result = nil)then
   begin
       exit InternalServerError();
   end;
@@ -314,11 +314,7 @@ begin
   (
       UserName := model.UserName
   );
-//  user.Logins.Add(new IdentityUserLogin
-//  (
-//      LoginProvider := externalLogin.LoginProvider,
-//      ProviderKey := externalLogin.ProviderKey
-//  ));
+  user.Logins.Add(new UserLoginInfo(externalLogin.LoginProvider,externalLogin.ProviderKey));
 
   var &create := await UserManager.CreateAsync(user);
   var errorResult := GetErrorResult(&create);

@@ -7,7 +7,8 @@ uses
   System.Dynamic,
   System.Linq,
   System.Security.Claims,
-  System.Text;
+  System.Text, 
+  Moshine.Identity.Models;
 
 type
   UserClaimRepository = public class(SqlCeRepository)
@@ -16,6 +17,7 @@ type
   public
     method Create;override;
     method Add(claim:Claim; userId:String);
+    method Get(user:IdentityUser):List<Claim>;
   end;
 
 implementation
@@ -58,6 +60,18 @@ begin
   executeParams.UserId := userId;
 
   Execute(sqlText, Object(executeParams));
+end;
+
+method UserClaimRepository.Get(user: IdentityUser): List<Claim>;
+begin
+  var sqlText := new StringBuilder();
+  sqlText.Append('select ClaimType,ClaimValue from userclaims where User_Id = @UserId');
+
+  var queryParams:dynamic := new ExpandoObject;
+  queryParams.UserId := user.Id;
+
+  exit Query(sqlText, Object(queryParams)).Select(c -> new Claim(string(c.ClaimType), string(c.ClaimValue))).ToList;
+
 end;
 
 end.

@@ -4,8 +4,10 @@ interface
 
 uses
   System.Collections.Generic,
+  System.Dynamic,
   System.Linq,
-  System.Text;
+  System.Text, 
+  Moshine.Identity.Models;
 
 type
   UserRoleRepository = public class(SqlCeRepository)
@@ -13,6 +15,7 @@ type
   protected
   public
     method Create;override;
+    method Get(user:IdentityUser):List<IdentityRole>;
   end;
 
 implementation
@@ -31,6 +34,16 @@ begin
 
   Execute(sqlText);
 
+end;
+
+method UserRoleRepository.Get(user: IdentityUser): List<IdentityRole>;
+begin
+  var sqlText := new StringBuilder('select Roles.Id, Roles.Name from userroles join roles on userroles.roleid = roles.id where userroles.userid=@UserId');
+
+  var queryParams:dynamic := new ExpandoObject;
+  queryParams.UserId := user.Id;
+
+  exit QueryAs<IdentityRole>(sqlText, Object(queryParams)).ToList;
 end;
 
 end.

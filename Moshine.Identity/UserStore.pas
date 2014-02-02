@@ -3,9 +3,11 @@
 interface
 
 uses
+  System.Data,
   System.Data.SqlServerCe,
   System.Security.Claims,
   System.Threading.Tasks,
+  System.Transactions,
   Microsoft.AspNet.Identity,
   System.Collections.Generic,
   System.Linq,
@@ -24,15 +26,13 @@ type
   private
 
 
-    method GetRolesAsync(user: IdentityUser): Task<IList<dynamic>>;
-    method IsInRoleAsync(user: IdentityUser; role: String): Task<dynamic>;
-    method GetPasswordHashAsync(user: IdentityUser): Task<dynamic>;
-    method HasPasswordAsync(user: IdentityUser): Task<dynamic>;
-
     _connection : SqlCeConnection;
     _userRepository : UserRepository;
     _claimRepository : UserClaimRepository;
     _loginRepository : UserLoginRepository;
+    _rolesRepository : UserRoleRepository;
+
+    method FindUser(getter:func<IdentityUser>):IdentityUser;
 
   public
     constructor(connection: SqlCeConnection);
@@ -71,26 +71,64 @@ begin
   _userRepository := new UserRepository(_connection);
   _claimRepository := new UserClaimRepository(_connection);
   _loginRepository := new UserLoginRepository(_connection);
+  _rolesRepository := new UserRoleRepository(_connection);
 end;
 
 
 method UserStore.CreateAsync(user: IdentityUser): Task;
 begin
+  var alreadyOpen := (_connection.State = ConnectionState.Open);
 
-  _userRepository.Add(user);
+  if(not alreadyOpen)then
+  begin
+    _connection.Open;
+  end;
+  try
+
+
+    var transaction := _connection.BeginTransaction;
+
+    var userRepository := new UserRepository(_connection, transaction);
+    var loginRepository := new UserLoginRepository(_connection, transaction);
+
+    userRepository.Add(user);
+
+    for each login in user.Logins do
+    begin
+      loginRepository.Add(user, login); 
+    end;
+
+    transaction.Commit;
+  finally
+    if(not alreadyOpen)then
+    begin
+      _connection.Close;
+    end;
+  end;
 
   exit Task.FromResult<Object>(nil);
 end;
 
 method UserStore.FindByIdAsync(userId: String): Task<IdentityUser>;
 begin
-  exit Task.FromResult<IdentityUser>(_userRepository.FindById(userId));
+  exit Task.FromResult<IdentityUser>(FindUser(() -> _userRepository.FindById(userId)));
 end;
 
 method UserStore.FindByNameAsync(userName: String): Task<IdentityUser>;
 begin
-  exit Task.FromResult<IdentityUser>(_userRepository.FindById(userName));
+  exit Task.FromResult<IdentityUser>(FindUser(() -> _userRepository.FindByName(userName)));
 end;
+
+method UserStore.FindUser(getter:func<IdentityUser>):IdentityUser;
+begin
+  var user := getter();
+  if(assigned(user))then
+  begin
+    user.Logins.AddRange(_loginRepository.Find(user));
+  end;
+  exit user;
+end;
+
 
 method UserStore.UpdateAsync(user: IdentityUser): Task;
 begin
@@ -100,16 +138,13 @@ end;
 
 method UserStore.AddClaimAsync(user: IdentityUser; claim: Claim): Task;
 begin
-
   _claimRepository.Add(claim, user.Id);
-
   exit Task.FromResult<Object>(nil);
 end;
 
 method UserStore.GetClaimsAsync(user: IdentityUser): Task<IList<Claim>>;
 begin
-  raise new NotImplementedException;
-  exit Task.FromResult<IList<Claim>>(nil);
+  exit Task.FromResult<IList<Claim>>(_claimRepository.Get(user));
 end;
 
 method UserStore.RemoveClaimAsync(user: IdentityUser; claim: Claim): Task;
@@ -160,8 +195,7 @@ end;
 
 method UserStore.GetRolesAsync(user:IdentityUser):Task<IList<String>>; 
 begin
-  raise new NotImplementedException;
-  exit Task.FromResult<IList<String>>(nil);
+  exit Task.FromResult<IList<String>>(_rolesRepository.Get(user).Select(r -> r.Name).ToList);
 end;
 
 method UserStore.IsInRoleAsync(user:IdentityUser;role:String):Task<Boolean>;
@@ -204,27 +238,5 @@ method UserStore.Dispose;
 begin
 
 end;
-
-method UserStore.GetRolesAsync(user: IdentityUser): Task<IList<dynamic>>;
-begin
-
-end;
-
-method UserStore.IsInRoleAsync(user: IdentityUser; role: String): Task<dynamic>;
-begin
-
-end;
-
-method UserStore.GetPasswordHashAsync(user: IdentityUser): Task<dynamic>;
-begin
-
-end;
-
-method UserStore.HasPasswordAsync(user: IdentityUser): Task<dynamic>;
-begin
-
-end;
-
-
 
 end.
