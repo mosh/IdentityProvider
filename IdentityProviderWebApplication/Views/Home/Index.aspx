@@ -19,20 +19,41 @@
                 ko.applyBindings(new LoginsViewModel(data));
             });
 
-            var href = $(location).attr('href');
+            var accessToken = undefined;
 
-            var q = href.split('#')[1];
-            var vars = [], hash;
+            if (typeof (Storage) !== "undefined") {
 
-            if (q != undefined) {
-                q = q.split('&');
-                for(var i = 0; i < q.length; i++){
-                    hash = q[i].split('=');
-                    vars.push(hash[1]);
-                    vars[hash[0]] = hash[1];
+                accessToken = localStorage.getItem('access_token');
+
+                if (accessToken == undefined) {
+
+                    var href = $(location).attr('href');
+
+                    var q = href.split('#')[1];
+                    var vars = [], hash;
+
+                    if (q != undefined) {
+                        q = q.split('&');
+                        for (var i = 0; i < q.length; i++) {
+                            hash = q[i].split('=');
+                            vars.push(hash[1]);
+                            vars[hash[0]] = hash[1];
+                        }
+                    }
+                    accessToken = vars['access_token'];
+
+                    if (accessToken != undefined) {
+                        localStorage.setItem('access_token', accessToken);
+                    }
+
+                }
+                else {
                 }
             }
-            var accessToken = vars['access_token'];
+            else {
+                alert('Browser doesn\'t support webstorage');
+            }
+
 
             var headers = {};
 
@@ -40,6 +61,9 @@
                 headers = {
                     "Authorization": "Bearer " + accessToken
                 }
+            }
+            else {
+                $("#loginContainer").css("visibility", "visible");
             }
 
             $.ajax({
@@ -59,8 +83,15 @@
                     $("#userName").val(data.userName);
                 }
                 else {
-                    alert("registered..");
+                    $("#usernameContainer").html(data.userName);
+                    $("#userContainer").css("visibility", "visible");
                 }
+            });
+
+            $("#logout").click(function () {
+                localStorage.removeItem("access_token");
+                $("#usernameContainer").html("");
+                $("#userContainer").css("visibility", "hidden");
             });
 
             $("#signUp").click(function () {
@@ -107,7 +138,8 @@
 <body>
     <form id="form1" runat="server">
     <div>
-        <table>
+        <div id="userContainer" style="float:right;visibility:hidden">Hello<span style="padding-left:5px;padding-right:5px" id="usernameContainer"></span><span id="logout" style="text-decoration:underline">Logout</span></div>
+        <table id="loginContainer" style="visibility:hidden">
             <thead>
                 <tr><th>Login With</th></tr>
             </thead>

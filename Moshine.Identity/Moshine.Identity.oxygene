@@ -77,6 +77,9 @@
       <HintPath>C:\Program Files\RemObjects Software\Oxygene\Echoes\Oxygene Reference Assemblies\RemObjects.Oxygene.Dynamic.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations">
+      <HintPath>C:\Program Files\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.5\System.ComponentModel.DataAnnotations.dll</HintPath>
+    </Reference>
     <Reference Include="System.Data" />
     <Reference Include="System.Data.SqlServerCe">
       <HintPath>C:\Program Files\Microsoft SQL Server Compact Edition\v4.0\Desktop\System.Data.SqlServerCe.dll</HintPath>
@@ -109,6 +112,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Controllers\AuthorizationController.pas" />
+    <Compile Include="Models\AccountBindingModels.pas" />
+    <Compile Include="Models\AccountViewModels.pas" />
     <Compile Include="Models\IdentityRole.pas" />
     <Compile Include="Models\IdentityUser.pas" />
     <Compile Include="Properties\AssemblyInfo.pas" />
@@ -132,6 +138,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Models" />
+    <Folder Include="Controllers" />
     <Folder Include="Results" />
     <Folder Include="Repositories" />
     <Folder Include="Properties\" />

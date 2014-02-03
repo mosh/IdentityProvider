@@ -157,8 +157,6 @@
     <Compile Include="FilterConfig.pas" />
     <Compile Include="Helpers\ExternalLoginData.pas" />
     <Compile Include="Helpers\RandomOAuthStateGenerator.pas" />
-    <Compile Include="Models\AccountBindingModels.pas" />
-    <Compile Include="Models\AccountViewModels.pas" />
     <Compile Include="Modules\AccountModule.pas" />
     <Compile Include="Modules\DefaultModule.pas" />
     <Compile Include="Providers\ApplicationOAuthProvider.pas" />
@@ -185,7 +183,6 @@
     <Folder Include="App_Data\" />
     <Folder Include="Modules" />
     <Folder Include="Controllers" />
-    <Folder Include="Models" />
     <Folder Include="Helpers" />
     <Folder Include="Views" />
     <Folder Include="Providers" />
