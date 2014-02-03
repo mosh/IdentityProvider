@@ -16,11 +16,17 @@ type
   protected
   public
     method &Index:ActionResult;
+    method List:ActionResult;
   end;
 
 implementation
 
 method HomeController.Index:ActionResult;
+begin
+  exit View;
+end;
+
+method HomeController.List: ActionResult;
 begin
   exit View;
 end;

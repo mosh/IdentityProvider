@@ -138,7 +138,7 @@
 <body>
     <form id="form1" runat="server">
     <div>
-        <div id="userContainer" style="float:right;visibility:hidden">Hello<span style="padding-left:5px;padding-right:5px" id="usernameContainer"></span><span id="logout" style="text-decoration:underline">Logout</span></div>
+        <div id="userContainer" style="float:right;visibility:hidden">Hello<span style="padding-left:5px;padding-right:5px" id="usernameContainer"></span><span id="logout" style="text-decoration:underline;cursor:pointer">Logout</span></div>
         <table id="loginContainer" style="visibility:hidden">
             <thead>
                 <tr><th>Login With</th></tr>

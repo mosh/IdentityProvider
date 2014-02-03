@@ -173,6 +173,9 @@
     <Content Include="Views\Home\Index.aspx">
       <SubType>Content</SubType>
     </Content>
+    <Content Include="Views\Home\List.aspx">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="Views\Web.config">
       <SubType>Content</SubType>
     </Content>
