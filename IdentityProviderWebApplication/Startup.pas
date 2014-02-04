@@ -7,6 +7,8 @@ uses
   System.Data.SqlServerCe,
   System.Linq,
   System.Text, 
+  System.Web.Http,
+  System.Web.Mvc,
   Microsoft.Owin,
   Microsoft.Owin.Security.Cookies,
   Microsoft.Owin.Security.OAuth,
@@ -36,8 +38,17 @@ implementation
 
 method Startup.Configuration(app: IAppBuilder);
 begin
+
+  var config := new HttpConfiguration();
+
+  //WebApiConfig.Register(config);
+  //app.UseWebApi(config);
+
   //app.UseNancy;
-  //app.UseWebApi(;
+
+  app.Map('/site',siteBuilder -> siteBuilder.UseNancy);
+  //app.Map('/api',apiBuilder -> apiBuilder.UseWebApi(config));
+
 
   app.UseCookieAuthentication(new CookieAuthenticationOptions());
   app.UseExternalSignInCookie(DefaultAuthenticationTypes.ExternalCookie);

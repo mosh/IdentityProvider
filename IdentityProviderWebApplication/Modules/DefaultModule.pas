@@ -21,7 +21,7 @@ implementation
 
 constructor DefaultModule;
 begin
-  Get['/'] := _ -> 'Hello World!';
+  Get['/Nancy'] := _ -> 'Hello World!';
 end;
 
 end.
