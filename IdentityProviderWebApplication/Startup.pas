@@ -15,8 +15,8 @@ uses
   Microsoft.AspNet.Identity,
   Moshine.Identity,
   Moshine.Identity.Models,
-  Owin, 
-  WebApplication5.Providers;
+  Moshine.Identity.Providers,
+  Owin;
 
 type
 

@@ -72,6 +72,9 @@
   <ItemGroup>
     <Compile Include="Program.pas" />
     <Compile Include="Properties\AssemblyInfo.pas" />
+    <Content Include="app.config">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="Properties\App.ico" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

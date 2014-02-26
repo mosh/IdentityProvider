@@ -155,11 +155,8 @@
     <Compile Include="Controllers\AccountController.pas" />
     <Compile Include="Controllers\HomeController.pas" />
     <Compile Include="FilterConfig.pas" />
-    <Compile Include="Helpers\ExternalLoginData.pas" />
-    <Compile Include="Helpers\RandomOAuthStateGenerator.pas" />
     <Compile Include="Modules\AccountModule.pas" />
     <Compile Include="Modules\DefaultModule.pas" />
-    <Compile Include="Providers\ApplicationOAuthProvider.pas" />
     <Compile Include="RouteConfig.pas" />
     <Compile Include="Startup.pas" />
     <Compile Include="WebApiConfig.pas" />
@@ -168,6 +165,9 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Content Include="packages.config">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="scripts\site.js">
       <SubType>Content</SubType>
     </Content>
     <Content Include="Views\Home\Index.aspx">
@@ -186,9 +186,8 @@
     <Folder Include="App_Data\" />
     <Folder Include="Modules" />
     <Folder Include="Controllers" />
-    <Folder Include="Helpers" />
+    <Folder Include="scripts" />
     <Folder Include="Views" />
-    <Folder Include="Providers" />
     <Folder Include="Properties\" />
     <Folder Include="Views\Home" />
   </ItemGroup>

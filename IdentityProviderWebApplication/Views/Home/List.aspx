@@ -8,31 +8,40 @@
 
     <script type="text/javascript" src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-2.1.0.js"></script>
     <script type="text/javascript" src="http://ajax.aspnetcdn.com/ajax/knockout/knockout-3.0.0.js"></script>
+    <script type="text/javascript" src="/scripts/site.js"></script>
 
     <script type="text/javascript">
 
 
         $(document).ready(function () {
 
+            Site.init();
 
-            var accessToken = undefined;
+            $.ajax({
+                beforeSend: function (request) {
+                    Site.setHeaders(request);
+                },
+                url: "/site/nancy",
+                type: "GET",
+                data: {}
+            }).fail(function () {
+                alert("not blah..");
+            }).done(function (data) {
+                alert("blah..");
+            });
 
-            if (typeof (Storage) !== "undefined") {
-
-                accessToken = localStorage.getItem('access_token');
-
-                if (accessToken == undefined) {
-                    alert("undefined");
-                }
-                else {
-                    alert("defined");
-                }
-            }
-            else {
-                alert('Browser doesn\'t support webstorage');
-            }
-
-
+            $.ajax({
+                beforeSend: function (request) {
+                    Site.setHeaders(request);
+                },
+                url: "/home/stuff",
+                type: "GET",
+                data: {}
+            }).fail(function () {
+                alert("not blah..");
+            }).done(function (data) {
+                alert("blah..");
+            });
 
         });
 

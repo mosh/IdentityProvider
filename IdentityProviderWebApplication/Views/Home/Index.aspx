@@ -8,75 +8,36 @@
 
     <script type="text/javascript" src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-2.1.0.js"></script>
     <script type="text/javascript" src="http://ajax.aspnetcdn.com/ajax/knockout/knockout-3.0.0.js"></script>
+    <script type="text/javascript" src="/scripts/site.js"></script>
 
     <script type="text/javascript">
-
+        function showLogin() {
+            $("#loginContainer").css("visibility", "visible");
+        }
 
         $(document).ready(function () {
 
+            Site.init();
 
             $.get("api/account/ExternalLogins?returnUrl=/&generateState=true", function (data) {
                 ko.applyBindings(new LoginsViewModel(data));
             });
 
-            var accessToken = undefined;
-
-            if (typeof (Storage) !== "undefined") {
-
-                accessToken = localStorage.getItem('access_token');
-
-                if (accessToken == undefined) {
-
-                    var href = $(location).attr('href');
-
-                    var q = href.split('#')[1];
-                    var vars = [], hash;
-
-                    if (q != undefined) {
-                        q = q.split('&');
-                        for (var i = 0; i < q.length; i++) {
-                            hash = q[i].split('=');
-                            vars.push(hash[1]);
-                            vars[hash[0]] = hash[1];
-                        }
-                    }
-                    accessToken = vars['access_token'];
-
-                    if (accessToken != undefined) {
-                        localStorage.setItem('access_token', accessToken);
-                    }
-
-                }
-                else {
-                }
-            }
-            else {
-                alert('Browser doesn\'t support webstorage');
-            }
-
-
-            var headers = {};
-
-            if (accessToken != undefined) {
-                headers = {
-                    "Authorization": "Bearer " + accessToken
-                }
-            }
-            else {
-                $("#loginContainer").css("visibility", "visible");
+            if (Site.accessToken == undefined) {
+                showLogin();
             }
 
             $.ajax({
                 beforeSend: function (request) {
-
-                    if (accessToken != undefined) {
-                        request.setRequestHeader("Authorization", "Bearer " + accessToken);
-                    }
-
-                    request.setRequestHeader("cache", false);
+                    Site.setHeaders(request);
                 },
                 url: "api/account/UserInfo"
-            }).fail(function () {
+            }).fail(function (data) {
+                if ((Site.accessToken != undefined) && (data.status == 401)) {
+                    showLogin();
+                    Site.clear();
+
+                }
             }).done(function (data) {
                 if (!data.hasRegistered) {
                     $("#registerTable").css("visibility", "visible");
@@ -89,7 +50,7 @@
             });
 
             $("#logout").click(function () {
-                localStorage.removeItem("access_token");
+                Site.clear();
                 $("#usernameContainer").html("");
                 $("#userContainer").css("visibility", "hidden");
             });
@@ -102,12 +63,7 @@
 
                 $.ajax({
                     beforeSend: function (request) {
-
-                        if (accessToken != undefined) {
-                            request.setRequestHeader("Authorization", "Bearer " + accessToken);
-                        }
-
-                        request.setRequestHeader("cache", false);
+                        Site.setHeaders(request);
                     },
                     url: "api/account/RegisterExternal",
                     type: "POST",

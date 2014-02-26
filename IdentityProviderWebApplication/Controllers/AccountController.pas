@@ -13,34 +13,34 @@ uses
   Microsoft.AspNet.Identity, 
   System.Web.Http,
   Microsoft.Owin.Security.OAuth,
+  Moshine.Identity.Controllers,
+  Moshine.Identity.Helpers,
   Moshine.Identity.Models,
+  Moshine.Identity.Providers,
   WebApplication5, 
-  WebApplication5.Helpers,
   Microsoft.Owin.Security.Cookies,
-  Moshine.Identity.Results,
-  WebApplication5.Providers;
+  Moshine.Identity.Results;
 
 type
 
   [Authorize]
   [RoutePrefix("api/Account")]
-  AccountController = public class(ApiController)
+  AccountController = public class(AuthorizationController)
   private
     const LocalLoginProvider:String = 'Local';
 
-    property Authentication:IAuthenticationManager read get_Authentication;
-    method get_Authentication:IAuthenticationManager;
-
     method GetErrorResult(&result:IdentityResult):IHttpActionResult; 
+
+
 
   protected
     method Dispose(disposing:Boolean);override;
+    method GetPublicClientId:String;override;
 
   public
     constructor;
     constructor (userManager:UserManager<IdentityUser>; accessToken:ISecureDataFormat<AuthenticationTicket>);
 
-    property UserManager:UserManager<IdentityUser>;
     property AccessTokenFormat: ISecureDataFormat<AuthenticationTicket>;
 
     [HostAuthentication(DefaultAuthenticationTypes.ExternalBearer)]
@@ -53,12 +53,6 @@ type
     [Route('ManageInfo')]
     method GetManageInfo(returnUrl:String; generateState:Boolean):Task<ManageInfoViewModel>;
 
-    [OverrideAuthentication]
-    [HostAuthentication(DefaultAuthenticationTypes.ExternalCookie)]
-    [AllowAnonymous]
-    [Route('ExternalLogin', Name := 'ExternalLogin')]
-    method  GetExternalLogin(provider:String;error:String := nil):Task<IHttpActionResult>; 
-
     [Route('AddExternalLogin')]
     method AddExternalLogin(model:AddExternalLoginBindingModel):Task<IHttpActionResult>;    
 
@@ -67,16 +61,6 @@ type
     [Route('RegisterExternal')]
     method RegisterExternal(model:RegisterExternalBindingModel):Task<IHttpActionResult>;
 
-    /// <summary>
-    /// returnUrl=/&generateState=true
-    /// returns list of supported external logins
-    /// </summary>
-    /// <param name="returnUrl"></param>
-    /// <param name="generateState"></param>
-    /// <returns></returns>
-    [AllowAnonymous]
-    [Route("ExternalLogins")]
-    method GetExternalLogins(returnUrl:String; generateState:Boolean):IEnumerable<ExternalLoginViewModel>;
 
     // POST api/Account/SetPassword
     [Route("SetPassword")]
@@ -94,6 +78,25 @@ type
     [AllowAnonymous]
     [Route("Register")]
     method Register(model:RegisterBindingModel):Task<IHttpActionResult>;
+
+
+    /// <summary>
+    /// returnUrl=/&generateState=true
+    /// returns list of supported external logins
+    /// </summary>
+    /// <param name="returnUrl"></param>
+    /// <param name="generateState"></param>
+    /// <returns></returns>
+    [AllowAnonymous]
+    [Route("ExternalLogins")]
+    method GetExternalLogins(returnUrl:String; generateState:Boolean):IEnumerable<ExternalLoginViewModel>;
+
+    [OverrideAuthentication]
+    [HostAuthentication(DefaultAuthenticationTypes.ExternalCookie)]
+    [AllowAnonymous]
+    [Route('ExternalLogin', Name := 'ExternalLogin')]
+    method  GetExternalLogin(provider:String;error:String := nil):Task<IHttpActionResult>; 
+
 
   end;
 
@@ -127,11 +130,6 @@ begin
   Authentication.SignOut(CookieAuthenticationDefaults.AuthenticationType);
   exit Ok();
 
-end;
-
-method AccountController.get_Authentication: IAuthenticationManager;
-begin
-  exit Request.GetOwinContext.Authentication;
 end;
 
 method AccountController.GetManageInfo(returnUrl:String; generateState:Boolean):Task<ManageInfoViewModel>;
@@ -174,56 +172,6 @@ begin
 
 end;
 
-method AccountController.GetExternalLogin(provider: String; error: String := nil): Task<IHttpActionResult>;
-begin
-  if (assigned(error))then
-  begin
-      exit (Redirect(Url.Content('~/') + '#error=' + Uri.EscapeDataString(error)));
-  end;
-
-  if (not User.Identity.IsAuthenticated)then
-  begin
-      exit new ChallengeResult(provider, self);
-  end;
-
-  var externalLogin := ExternalLoginData.FromIdentity(User.Identity as ClaimsIdentity);
-
-  if (not assigned(externalLogin))then
-  begin
-      exit InternalServerError();
-  end;
-
-  if (externalLogin.LoginProvider <> provider) then
-  begin
-      Authentication.SignOut(DefaultAuthenticationTypes.ExternalCookie);
-      exit new ChallengeResult(provider, self);
-  end;
-
-  var user := await UserManager.FindAsync(new UserLoginInfo(externalLogin.LoginProvider,
-      externalLogin.ProviderKey));
-
-  var hasRegistered := (user <> nil);
-
-  if (hasRegistered)then
-  begin
-      Authentication.SignOut(DefaultAuthenticationTypes.ExternalCookie);
-      var oAuthIdentity := await UserManager.CreateIdentityAsync(user, OAuthDefaults.AuthenticationType);
-      var cookieIdentity := await UserManager.CreateIdentityAsync(user, CookieAuthenticationDefaults.AuthenticationType);
-
-      var properties := ApplicationOAuthProvider.CreateProperties(user.UserName);
-
-      Authentication.SignIn(properties, oAuthIdentity, cookieIdentity);
-  end
-  else
-  begin
-     var claims := externalLogin.GetClaims();
-      var identity := new ClaimsIdentity(claims, OAuthDefaults.AuthenticationType);
-      Authentication.SignIn(identity);
-  end;
-
-  exit Ok();
-
-end;
 
 method AccountController.AddExternalLogin(model: AddExternalLoginBindingModel): Task<IHttpActionResult>;
 begin
@@ -327,45 +275,6 @@ begin
 
 end;
 
-method AccountController.GetExternalLogins(returnUrl:String; generateState:Boolean):IEnumerable<ExternalLoginViewModel>;
-begin
-  var descriptions := Authentication.GetExternalAuthenticationTypes();
-  var logins := new List<ExternalLoginViewModel>();
-
-  var state:String;
-
-  if (generateState)then
-  begin
-      var strengthInBits := 256;
-      state := RandomOAuthStateGenerator.Generate(strengthInBits);
-  end
-  else
-  begin
-      state := nil;
-  end;
-
-  for each description in descriptions do
-  begin
-      var login := new ExternalLoginViewModel();
-      login.Name := description.Caption;
-      login.Url := Url.Route("ExternalLogin", new class
-          (
-              provider := description.AuthenticationType,
-              response_type := "token",
-              client_id  := Startup.PublicClientId,
-              redirect_uri := new Uri(Request.RequestUri, returnUrl).AbsoluteUri,
-              state := state
-          ));
-
-      login.State := state;
-
-      logins.Add(login);
-  end;
-
-  exit logins;
-
-end;
-
 
 method AccountController.Dispose(disposing:Boolean);
 begin
@@ -465,6 +374,101 @@ begin
   end;
 
   exit Ok();
+end;
+
+method AccountController.GetPublicClientId:String;
+begin
+  exit Startup.PublicClientId;
+end;
+
+method AccountController.GetExternalLogins(returnUrl:String; generateState:Boolean):IEnumerable<ExternalLoginViewModel>;
+begin
+  var descriptions := Authentication.GetExternalAuthenticationTypes();
+  var logins := new List<ExternalLoginViewModel>();
+
+  var state:String;
+
+  if (generateState)then
+  begin
+      var strengthInBits := 256;
+      state := RandomOAuthStateGenerator.Generate(strengthInBits);
+  end
+  else
+  begin
+      state := nil;
+  end;
+
+  for each description in descriptions do
+  begin
+      var login := new ExternalLoginViewModel();
+      login.Name := description.Caption;
+      login.Url := Url.Route("ExternalLogin", new class
+          (
+              provider := description.AuthenticationType,
+              response_type := 'token',
+              client_id  := GetPublicClientId,//Startup.PublicClientId,
+              redirect_uri := new Uri(Request.RequestUri, returnUrl).AbsoluteUri,
+              state := state
+          ));
+
+      login.State := state;
+
+      logins.Add(login);
+  end;
+
+  exit logins;
+
+end;
+
+method AccountController.GetExternalLogin(provider: String; error: String := nil): Task<IHttpActionResult>;
+begin
+  if (assigned(error))then
+  begin
+      exit (Redirect(Url.Content('~/') + '#error=' + Uri.EscapeDataString(error)));
+  end;
+
+  if (not User.Identity.IsAuthenticated)then
+  begin
+      exit new ChallengeResult(provider, self);
+  end;
+
+  var externalLogin := ExternalLoginData.FromIdentity(User.Identity as ClaimsIdentity);
+
+  if (not assigned(externalLogin))then
+  begin
+      exit InternalServerError();
+  end;
+
+  if (externalLogin.LoginProvider <> provider) then
+  begin
+      Authentication.SignOut(DefaultAuthenticationTypes.ExternalCookie);
+      exit new ChallengeResult(provider, self);
+  end;
+
+  var user := await UserManager.FindAsync(new UserLoginInfo(externalLogin.LoginProvider,
+      externalLogin.ProviderKey));
+
+  var hasRegistered := (user <> nil);
+
+  if (hasRegistered)then
+  begin
+      Authentication.SignOut(DefaultAuthenticationTypes.ExternalCookie);
+      var oAuthIdentity := await UserManager.CreateIdentityAsync(user, OAuthDefaults.AuthenticationType);
+      var cookieIdentity := await UserManager.CreateIdentityAsync(user, CookieAuthenticationDefaults.AuthenticationType);
+
+      var properties := ApplicationOAuthProvider.CreateProperties(user.UserName);
+
+      Authentication.SignIn(properties, oAuthIdentity, cookieIdentity);
+  end
+  else
+  begin
+     var claims := externalLogin.GetClaims();
+      var identity := new ClaimsIdentity(claims, OAuthDefaults.AuthenticationType);
+      Authentication.SignIn(identity);
+  end;
+
+  exit Ok();
+
 end;
 
 end.

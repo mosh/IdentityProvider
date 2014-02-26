@@ -1,4 +1,4 @@
-﻿namespace WebApplication5.Helpers;
+﻿namespace Moshine.Identity.Helpers;
 
 interface
 

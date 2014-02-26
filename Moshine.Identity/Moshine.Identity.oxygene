@@ -59,9 +59,25 @@
       <HintPath>..\packages\Microsoft.AspNet.Identity.Core.1.0.0\lib\net45\Microsoft.AspNet.Identity.Core.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="Microsoft.AspNet.Identity.Owin">
+      <HintPath>..\packages\Microsoft.AspNet.Identity.Owin.1.0.0\lib\net45\Microsoft.AspNet.Identity.Owin.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="Microsoft.Owin">
-      <HintPath>..\packages\Microsoft.Owin.2.0.2\lib\net45\Microsoft.Owin.dll</HintPath>
+      <HintPath>..\packages\Microsoft.Owin.2.1.0\lib\net45\Microsoft.Owin.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.Owin.Security">
+      <HintPath>..\packages\Microsoft.Owin.Security.2.1.0\lib\net45\Microsoft.Owin.Security.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.Owin.Security.Cookies">
+      <HintPath>..\packages\Microsoft.Owin.Security.Cookies.2.0.2\lib\net45\Microsoft.Owin.Security.Cookies.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.Owin.Security.OAuth">
+      <HintPath>..\packages\Microsoft.Owin.Security.OAuth.2.1.0\lib\net45\Microsoft.Owin.Security.OAuth.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="mscorlib" />
@@ -92,6 +108,9 @@
     <Reference Include="System.Transactions">
       <HintPath>C:\Program Files\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.5\System.Transactions.dll</HintPath>
     </Reference>
+    <Reference Include="System.Web">
+      <HintPath>C:\Program Files\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.5\System.Web.dll</HintPath>
+    </Reference>
     <Reference Include="System.Web.Http">
       <HintPath>..\packages\Microsoft.AspNet.WebApi.Core.5.1.0\lib\net45\System.Web.Http.dll</HintPath>
       <Private>True</Private>
@@ -113,11 +132,14 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Controllers\AuthorizationController.pas" />
+    <Compile Include="Helpers\ExternalLoginData.pas" />
+    <Compile Include="Helpers\RandomOAuthStateGenerator.pas" />
     <Compile Include="Models\AccountBindingModels.pas" />
     <Compile Include="Models\AccountViewModels.pas" />
     <Compile Include="Models\IdentityRole.pas" />
     <Compile Include="Models\IdentityUser.pas" />
     <Compile Include="Properties\AssemblyInfo.pas" />
+    <Compile Include="Providers\ApplicationOAuthProvider.pas" />
     <Compile Include="Repositories\RoleRepository.pas" />
     <Compile Include="Repositories\SqlCeRepository.pas" />
     <Compile Include="Repositories\UserClaimRepository.pas" />
@@ -139,6 +161,8 @@
   <ItemGroup>
     <Folder Include="Models" />
     <Folder Include="Controllers" />
+    <Folder Include="Helpers" />
+    <Folder Include="Providers" />
     <Folder Include="Results" />
     <Folder Include="Repositories" />
     <Folder Include="Properties\" />

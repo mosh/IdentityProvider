@@ -1,4 +1,4 @@
-namespace WebApplication5.Providers;
+namespace Moshine.Identity.Providers;
 
 interface
 
@@ -12,8 +12,7 @@ uses
   Microsoft.Owin.Security,
   Microsoft.Owin.Security.Cookies,
   Microsoft.Owin.Security.OAuth, 
-  Moshine.Identity.Models,
-  WebApplication5;
+  Moshine.Identity.Models;
 
 type
 

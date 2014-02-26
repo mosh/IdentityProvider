@@ -17,6 +17,7 @@ type
   public
     method &Index:ActionResult;
     method List:ActionResult;
+    method Stuff:ActionResult;
   end;
 
 implementation
@@ -29,6 +30,12 @@ end;
 method HomeController.List: ActionResult;
 begin
   exit View;
+end;
+
+method HomeController.Stuff: ActionResult;
+begin
+  var principal := self.Request.GetOwinContext().Authentication.User;
+  exit  new JsonResult();
 end;
 
 
